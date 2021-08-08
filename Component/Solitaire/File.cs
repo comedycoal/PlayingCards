@@ -23,12 +23,13 @@ namespace PlayingCards.Component.Solitaire
     {
         static File()
         {
-            AddRecord(typeof(File), "InitialCount", "PileBuildStrategy", "InitialPartitionIndex");
+            AddRecord(typeof(File), "InitialCount", "PileBuildStrategy", "InitialShown");
         }
 
 		// Empty
 		#region Public constants
 		//====================//
+
 		//======================================================================//
 		#endregion
 
@@ -56,7 +57,8 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// Constructs a <see cref="File"/> with standard Klondike setting and 0 initial cards
 		/// </summary>
-		public File() : base()
+		/// <param name="context">Game context associated</param>
+		public File(IGameContext context) : base(context)
 		{
             m_partitionIndex = 0;
 			m_availableIndex = 0;
@@ -72,7 +74,8 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a <see cref="File"/>.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		public File(PileProperty properties) : this()
+		/// <param name="context">Game context associated</param>
+		public File(IGameContext context, PileProperty properties) : this(context)
         {
 			SetProperties(properties);
 			m_availableIndex = 0;
@@ -113,7 +116,7 @@ namespace PlayingCards.Component.Solitaire
         /// <inheritdoc cref="SolitairePile.SetProperties"/>
         protected override void SetProperties(PileProperty properties)
         {
-			m_partitionIndex = properties.InitialPartitionIndex ?? (int)PileProperty.GetDefaultNoneNullValue("InitialPartitionIndex");
+			m_partitionIndex = InitialCount - properties.InitialShown ?? (int)PileProperty.GetDefaultNoneNullValue("InitialShown");
 			base.SetProperties(properties);    
         }
 

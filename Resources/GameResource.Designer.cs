@@ -63,16 +63,18 @@ namespace PlayingCards.Game.Solitaire {
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
         ///
-        ///&lt;games&gt;
-        ///  &lt;game name=&quot;Klondike&quot;&gt;
-        ///    &lt;!--Meta data here--&gt;
-        ///    &lt;deck count=&quot;1&quot; type=&quot;full&quot;/&gt;
-        ///    &lt;layout&gt;
-        ///      &lt;stock id=&quot;0&quot; x=&quot;1&quot; y=&quot;1&quot; variant=&quot;single&quot; association=&quot;1&quot; flip_ammount=&quot;3&quot; allowance=&quot;3&quot;/&gt;
-        ///      &lt;waste id=&quot;1&quot; x=&quot;2&quot; y=&quot;1&quot; variant=&quot;single&quot; shown_ammount=&quot;3&quot;/&gt;
-        ///      &lt;foundation_set start_id=&quot;2&quot; end_id=&quot;5&quot;&gt;
-        ///        &lt;foundation id=&quot;auto&quot; x=&quot;4&quot; y=&quot;1&quot; suit=&quot;hearts&quot; initial=&quot;A&quot; rank_gap=&quot;1&quot; lap=&quot;1&quot; /&gt;
-        ///        &lt;foundation id=&quot;auto&quot; x=&quot;5&quot; y=&quot;1&quot; suit=&quot;d [rest of string was truncated]&quot;;.
+        ///&lt;library xmlns=&quot;http://playingcards.org/solitaire&quot;&gt;
+        ///	&lt;game id=&quot;1&quot;&gt;
+        ///		&lt;!--Meta data here--&gt;
+        ///		&lt;metadata name=&quot;Klondike&quot; win_condition=&quot;fill_foundation&quot;&gt;
+        ///			&lt;description&gt;...&lt;/description&gt;
+        ///			&lt;deck count=&quot;1&quot; type=&quot;full&quot;/&gt;
+        ///		&lt;/metadata&gt;
+        ///		&lt;layout&gt;
+        ///			&lt;stock id=&quot;auto&quot; pos=&quot;1,1&quot; variant=&quot;base&quot; deal_amount=&quot;3&quot; association=&quot;1&quot;/&gt;
+        ///			&lt;waste id=&quot;1&quot; pos=&quot;2,1&quot; shown_amount=&quot;3&quot;/&gt;
+        ///			&lt;foundation_set start_id=&quot;auto&quot; build_init=&quot;A&quot; build_gap=&quot;1&quot; build_wrapping=&quot;false&quot;&gt;
+        ///		 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SolitaireGameData {
             get {

@@ -37,7 +37,8 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// Constructs a standard <see cref="Waste"/> with one card showing.
 		/// </summary>
-		public Waste() : base()
+		/// <param name="context">Game context associated</param>
+		public Waste(IGameContext context) : base(context)
 		{
             m_shownCount = 1;
 		}
@@ -46,7 +47,8 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a <see cref="Waste"/>.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		public Waste(PileProperty properties) : base()
+		/// <param name="context">Game context associated</param>
+		public Waste(IGameContext context, PileProperty properties) : base(context)
         {
 			SetProperties(properties);
         }
@@ -95,7 +97,7 @@ namespace PlayingCards.Component.Solitaire
         /// <inheritdoc cref="SolitairePile.SetProperties"/>
 		protected override void SetProperties(PileProperty properties)
 		{
-			m_shownCount = properties.InitialPartitionIndex ?? 1;
+			m_shownCount = properties.InitialShown ?? 1;
 
 			properties.InitialCount = 0;
 			properties.PileBuildStrategy = new NoBuildStrategy();

@@ -27,19 +27,19 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// Pile's initial partition index, i.e how many cards are visible at the start.
 		/// </summary>
-		public int? InitialPartitionIndex;
+		public int? InitialShown;
 
 		/// <summary>
 		/// List of associated piles.
 		/// </summary>
-		public List<SolitairePile> AssociatedPiles;
+		public List<IdentifierToken> AssociationTokens;
 
 		/// <summary>
 		/// Quantity at which when <em><see cref="SolitairePile.Count"/> - <see cref="SolitairePile.AvailableIndex"/></em>
-		/// reaches that a transfer is automatically made to <see cref="PileProperty.AssociatedPiles"/>
+		/// reaches that a transfer is automatically made to <see cref="PileProperty.AssociationTokens"/>
 		/// </summary>
 		/// <remarks>
-		/// <see cref="PileProperty.AssociatedPiles"/> should have length of 1 if <see cref="AutoMoveThreshold"/> is not <see langword="null"/>
+		/// <see cref="AssociationTokens"/> should have length of 1 if <see cref="AutoMoveThreshold"/> is not <see langword="null"/>
 		/// </remarks>
 		public int? AutoMoveThreshold;
 
@@ -51,10 +51,10 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// The pile's correspondent suit.
 		/// </summary>
-		public PlayingCards.Primitives.Suit? CorrespondentSuit;
+		public Primitives.Suit? CorrespondentSuit;
 
 		/// <summary>
-		/// Dictates how many cards to send to <see cref="PileProperty.AssociatedPiles"/> at once.
+		/// Dictates how many cards to send to <see cref="AssociationTokens"/> at once.
 		/// </summary>
 		public int? DealAmount;
 
@@ -74,7 +74,7 @@ namespace PlayingCards.Component.Solitaire
 			return fieldName switch
 			{
 				"InitialCount" => 0,
-				"InitialPartitionIndex" => 0,
+				"InitialShown" => 1,
 				"AutomoveThreshold" => Primitives.Rank.K_RANK,
 				"DealAmmount" => 1,
 				"RestockAllowance" => Stock.INFINITE,
@@ -99,7 +99,7 @@ namespace PlayingCards.Component.Solitaire
 
 		/// <summary>
 		/// Determine the strictest <see cref="PileProperty.TransferMode"/> that <paramref name="properties"/> can be used to instantiate a 
-		/// <see cref="SolitairePile"/> using <see cref="SolitairePile.CreatePile{T}"/>,
+		/// <see cref="SolitairePile"/> using <see cref="SolitairePile.CreatePile"/>,
 		/// of which properties in <paramref name="enforcedFields"/>is needed.
 		/// </summary>
 		/// <param name="properties">A <see cref="PileProperty"/> instance.</param>

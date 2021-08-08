@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 using PlayingCards.Primitives;
-using PlayingCards.Extensions;
+using PlayingCards.Utilities;
 using PlayingCards.Component;
 using PlayingCards.Component.Solitaire;
 

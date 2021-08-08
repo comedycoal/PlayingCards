@@ -39,7 +39,7 @@ namespace PlayingCards.Component.Solitaire
         #region Fields
         //==========//
 
-        private List<SolitairePile> m_dealDestinations;
+        private List<IdentifierToken> m_associationTokens;
         private int m_dealCount;
 		//======================================================================//
 		#endregion
@@ -52,9 +52,10 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a standard <see cref="Stock"/>, distributing one card per round in distribute mode
 		/// with a dangerous <see langword="null"/> destination pile.
 		/// </summary>
-		public StockDealer() : base()
+		/// <param name="context">Game context associated</param>
+		public StockDealer(IGameContext context) : base(context)
 		{
-			m_dealDestinations = null;
+			m_associationTokens = null;
 			m_dealCount = 1;
 		}
 
@@ -62,7 +63,8 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a <see cref="StockDealer"/>.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		public StockDealer(PileProperty properties) : base()
+		/// <param name="context">Game context associated</param>
+		public StockDealer(IGameContext context, PileProperty properties) : base(context)
 		{
 			SetProperties(properties);
         }
@@ -90,9 +92,6 @@ namespace PlayingCards.Component.Solitaire
 
         /// <inheritdoc cref="SolitairePile.Clearable"/>
         public override bool Clearable => true;
-
-		/// <inheritdoc cref="Stock.DealDestination"/>
-		public override SolitairePile DealDestination => throw new NotImplementedException();
 		//======================================================================//
 		#endregion
 
@@ -101,30 +100,32 @@ namespace PlayingCards.Component.Solitaire
 		//==================//
 
 		/// <summary>
-		/// 
+		/// Public property. Retrieves the count of cards the pile deals to a destination each deal.
 		/// </summary>
 		public virtual int DealCount => m_dealCount;
 
 		/// <summary>
-		/// 
+		/// Public property. Retrieves a list of associations, which is of the pile's destinations.
 		/// </summary>
-		public virtual List<SolitairePile> DealDestinations => m_dealDestinations;
-        //======================================================================//
-        #endregion
+		public virtual List<IdentifierToken> AssociationTokens => m_associationTokens;
+
+		private List<SolitairePile> DealDestinations => AssociationTokens.ConvertAll(x => GameContext.ResolveAssociation(this, x));
+		//======================================================================//
+		#endregion
 
 
-        #region Overloaded methods
-        //======================//
+		#region Overloaded methods
+		//======================//
 
-        /// <inheritdoc cref="SolitairePile.SetProperties"/>
-        protected override void SetProperties(PileProperty properties)
+		/// <inheritdoc cref="SolitairePile.SetProperties"/>
+		protected override void SetProperties(PileProperty properties)
         {
-            if (properties.AssociatedPiles == null)
+            if (properties.AssociationTokens == null)
             {
                 // throw something
                 throw new System.NotImplementedException();
             }
-            m_dealDestinations = properties.AssociatedPiles;
+			m_associationTokens = properties.AssociationTokens;
             m_dealCount = properties.DealAmount ?? (int)PileProperty.GetDefaultNoneNullValue("DealAmount");
 
 			properties.InitialCount = 0;
@@ -134,14 +135,15 @@ namespace PlayingCards.Component.Solitaire
         //======================================================================//
         #endregion
 
-        // 4 new
+        // 2 new
         #region New methods
         //===============//
 
         /// <inheritdoc cref="Stock.CreateDealMove"/>
         public override IMove CreateDealMove()
         {
-			return new DistributeMove(Cards, DealDestinations.ConvertAll(x => (IPile<Card>)x.Cards), DealCount);
+			var piles = DealDestinations.ConvertAll(x => (IPile<Card>)x.Cards);
+			return new DistributeMove(Cards, piles, DealCount);
         }
 
         /// <inheritdoc cref="Stock.CreateRestockMove"/>

@@ -39,7 +39,7 @@ namespace PlayingCards.Random
 		public uint Seed
 		{
 			get { return m_seed; }
-			protected set { m_seed = value; Reset(); }
+			set { m_seed = value; Reset(); }
 		}
 
         

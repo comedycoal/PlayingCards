@@ -31,6 +31,7 @@ namespace PlayingCards.Component.Solitaire
 
 		private static Dictionary<System.Type, string[]> c_names;
 
+
 		static SolitairePile()
 		{
 			c_names = new Dictionary<Type, string[]>();
@@ -42,9 +43,12 @@ namespace PlayingCards.Component.Solitaire
 		//==========//
 
 		private int m_initialCount;
+
 		/// <summary></summary>
 		protected BuildStrategy m_buildStrategy;
+
 		private Pile<Card> m_cards;
+		private IGameContext m_gameContext;
 		//======================================================================//
 		#endregion
 
@@ -55,11 +59,12 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// Constructs a <see cref="SolitairePile"/> with <see cref="InitialCount"/> = 0 and <see cref="PileBuildStrategy"/> = <see cref="AnySuitStrategy"/>
 		/// </summary>
-		protected SolitairePile()
+		protected SolitairePile(IGameContext gameContext)
 		{
 			m_initialCount = 0;
 			m_buildStrategy = new AnySuitStrategy();
 			m_cards = new Pile<Card>();
+			m_gameContext = gameContext;
 		}
 
 		//======================================================================//
@@ -74,23 +79,42 @@ namespace PlayingCards.Component.Solitaire
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="strs"></param>
-		protected static void AddRecord(System.Type type, params string[] strs)
+		protected static void AddRecord(Type type, params string[] strs)
 		{
 			SolitairePile.c_names.Add(type, strs);
 		}
 
 		/// <summary>
-		/// Creates an inherited <see cref="SolitairePile"/> as <typeparamref name="T"/>
-		/// with properties inferred from <paramref name="property"/>.
+		/// Constructs into <paramref name="context"/> and returns a <see cref="SolitairePile"/> of type <paramref name="type"/>
+		/// with properties drew from <paramref name="property"/> using prpperty transfer mode <paramref name="mode"/>.
 		/// </summary>
-		/// <typeparam name="T">A subclass of <see cref="SolitairePile"/></typeparam>
-		/// <param name="property">A <see cref="PileProperty"/> instance.</param>
-		/// <param name="mode"> The <see cref="PileProperty.TransferMode"/> used </param>
-		/// <returns>A <typeparamref name="T"/> instance, or <see langword="null"/>.</returns>
-		public static T CreatePile<T>(PileProperty property, PileProperty.TransferMode mode=PileProperty.TransferMode.STRICT) where T : SolitairePile
+		/// <param name="context">The <see cref="IGameContext"/> that the pile belongs to.</param>
+		/// <param name="type">The type of the pile.</param>
+		/// <param name="interfaceReturn">Returns whether the pile instantiated is also a interface' instance.</param>
+		/// <param name="property">The properties of the pile.</param>
+		/// <param name="mode">The <see cref="PileProperty.TransferMode"/> used.</param>
+		/// <returns>A <see cref="SolitairePile"/> instance.</returns>
+		public static SolitairePile CreatePile(IGameContext context,
+										Type type,
+										out InterfaceReturn interfaceReturn,
+										PileProperty property,
+										PileProperty.TransferMode mode = PileProperty.TransferMode.STRICT)
 		{
-			T pile = Activator.CreateInstance<T>();
-			bool fieldsGot = c_names.TryGetValue(typeof(T), out string[] enforcedFields);
+			if (!typeof(SolitairePile).IsAssignableFrom(type))
+				throw new NotImplementedException();
+
+			var instance = Activator.CreateInstance(type, context);
+
+			interfaceReturn = new InterfaceReturn();
+
+			if (typeof(IFoundation).IsAssignableFrom(type))
+				interfaceReturn.FoundationReference = (IFoundation)instance;
+			if (typeof(IDealer).IsAssignableFrom(type))
+				interfaceReturn.DealerReference = (IDealer)instance;
+
+			var pile = (SolitairePile)instance;
+
+			bool fieldsGot = c_names.TryGetValue(type, out string[] enforcedFields);
 			if (fieldsGot)
 			{
 				var highestMode = PileProperty.GetMostApplicableTransferMode(property, enforcedFields);
@@ -103,7 +127,6 @@ namespace PlayingCards.Component.Solitaire
 							if (fieldInfo.GetValue(property) is null)
 								fieldInfo.SetValue(property, PileProperty.GetDefaultNoneNullValue(fieldInfo));
 						}
-
 					pile.SetProperties(property);
 					return pile;
 				}
@@ -125,6 +148,15 @@ namespace PlayingCards.Component.Solitaire
 		// 9 new, 4 of which abstract
 		#region New properties
 		//==================//
+
+		/// <summary>
+		/// Readonly property. Retrieves the <see cref="IGameContext"/> that contains the pile.
+		/// </summary>
+		public IGameContext GameContext
+		{
+			get { return m_gameContext; }
+			protected set { m_gameContext = value; }
+		}
 
 		/// <summary>
 		/// Readonly property. Retrieves the number of cards present in the pile.

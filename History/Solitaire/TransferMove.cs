@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using PlayingCards.Primitives;
 using PlayingCards.Component;
-using PlayingCards.Extensions;
+using PlayingCards.Utilities;
 
 namespace PlayingCards.History.Solitaire
 {

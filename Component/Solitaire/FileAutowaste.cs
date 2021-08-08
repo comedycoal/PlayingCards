@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using PlayingCards.Primitives;
 using PlayingCards.History;
@@ -22,13 +23,13 @@ namespace PlayingCards.Component.Solitaire
 	{
         static FileAutowaste()
         {
-            AddRecord(typeof(FileAutowaste), "InitialCount", "PileBuildStrategy", "InitialPartionIndex", "AssociatedPiles", "AutoMoveThreshold");
+            AddRecord(typeof(FileAutowaste), "InitialCount", "PileBuildStrategy", "InitialShown", "AssociatedPiles", "AutoMoveThreshold");
         }
 
         #region Fields
         //==========//
 
-        private SolitairePile m_associatedPile;
+        private IdentifierToken m_associationToken;
 		private int m_automoveThreshold;
 		//======================================================================//
 		#endregion
@@ -41,21 +42,24 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a standard Spider-like <see cref="FileAutowaste"/> (<see cref="SameSuitStrategy"/> build) with 0 initial cards
 		/// with a dangerous <see langword="null"/> destination pile.
 		/// </summary>
-		public FileAutowaste() : base(new PileProperty {
+		/// <param name="context">Game context associated</param>
+		public FileAutowaste(IGameContext context) : base(context, new PileProperty {
 			InitialCount = 0,
-			InitialPartitionIndex = 0,
+			InitialShown = 0,
+			AssociationTokens = new List<IdentifierToken> { IdentifierToken.None },
 			PileBuildStrategy = new SameSuitStrategy(BuildStrategy.Setting.StandardFileSetting, Suit.ANY_SUIT)
 			})
 		{
-            m_associatedPile = null;
-            m_automoveThreshold = (int)Rank.K_RANK;
+
+			m_automoveThreshold = (int)Rank.K_RANK;
         }
 
 		/// <summary>
 		/// Constructs a <see cref="FileAutowaste"/>.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		public FileAutowaste(PileProperty properties) : this()
+		/// <param name="context">Game context associated</param>
+		public FileAutowaste(IGameContext context, PileProperty properties) : this(context)
 		{
 			SetProperties(properties);
 		}
@@ -78,27 +82,34 @@ namespace PlayingCards.Component.Solitaire
         #region New properties
         //==================//
 
-		/// <summary>
-		/// 
-		/// </summary>
         public int AutoMoveThreshold => m_automoveThreshold;
-        //======================================================================//
-        #endregion
+
+		/// <summary>
+		/// Readonly property. Retrieves association token to the deal destination.
+		/// </summary>
+		public virtual IdentifierToken AssociationToken => m_associationToken;
+
+		/// <summary>
+		/// Readonly property. Retrieves reference to the deal destination <see cref="SolitairePile"/>, as resolved by the pile's <see cref="IGameContext"/>.
+		/// </summary>
+		private SolitairePile DealDestination => GameContext.ResolveAssociation(this, AssociationToken);
+		//======================================================================//
+		#endregion
 
 
-        #region Overloaded methods
-        //======================//
+		#region Overloaded methods
+		//======================//
 
-        /// <inheritdoc cref="SolitairePile.SetProperties"/>
-        protected override void SetProperties(PileProperty properties)
+		/// <inheritdoc cref="SolitairePile.SetProperties"/>
+		protected override void SetProperties(PileProperty properties)
         {
-            if (properties.AssociatedPiles == null || properties.AssociatedPiles.Count > 1)
+            if (properties.AssociationTokens == null || properties.AssociationTokens.Count > 1)
             {
                 // throw something
                 throw new NotImplementedException();
             }
 
-            m_associatedPile = properties.AssociatedPiles[0];
+            m_associationToken = properties.AssociationTokens[0];
             m_automoveThreshold = properties.AutoMoveThreshold ?? (int)PileProperty.GetDefaultNoneNullValue("AutoMoveThreshold");
             base.SetProperties(properties);
         }
@@ -110,7 +121,7 @@ namespace PlayingCards.Component.Solitaire
 		{
 			if (Count - AvailableIndex >= AutoMoveThreshold)
 			{
-				transferData.AddAction(CreateTransfer(m_associatedPile, AutoMoveThreshold));
+				transferData.AddAction(this.CreateTransfer(DealDestination, AutoMoveThreshold));
 			}
 		}
 		//======================================================================//

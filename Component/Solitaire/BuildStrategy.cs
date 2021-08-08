@@ -152,7 +152,37 @@ namespace PlayingCards.Component.Solitaire
             return BuildSetting.RankGap == ANY_GOES_GAP
                 || (BuildSetting.AllowWrapping ? gap == BuildSetting.RankGap : gap == BuildSetting.RankGap && gap * BuildSetting.RankGap > 0);
         }
-    }
+
+		/// <summary>
+		/// Factory method to create a build strategy based on a "name" string.
+		/// </summary>
+		/// <param name="type">A string identifying the type of <see cref="BuildStrategy"/>.
+		/// Should be the same as the value of "build_strat" element in the default schema.</param>
+		/// <param name="setting">A <see cref="Setting"/> instance.</param>
+		/// <param name="correspondentSuit">A <see cref="Suit"/> instance, used if returning a <see cref="SameSuitStrategy"/>.</param>
+		/// <returns>A <see cref="BuildStrategy"/> object.</returns>
+		public static BuildStrategy Create(string type, Setting setting, Suit correspondentSuit)
+		{
+			switch (type)
+			{
+				case null:
+				case "none":
+					return new NoBuildStrategy();
+				case "any":
+					return new AnySuitStrategy(setting);
+				case "alternate_color":
+					return new AlternatingColorStrategy(setting);
+				case "same_color":
+					return new SameColorStrategy(setting);
+				case "alternate_suit":
+					return new DifferentSuitStrategy(setting);
+				case "same_suit":
+					return new SameSuitStrategy(setting, correspondentSuit);
+				default:
+					throw new NotImplementedException();
+			}
+		}
+	}
     
 
     /// <summary>

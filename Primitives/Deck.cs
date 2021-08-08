@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-using PlayingCards.Extensions;
+using PlayingCards.Utilities;
 using PlayingCards.Random;
 
 namespace PlayingCards.Primitives

@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace PlayingCards.Extensions
+namespace PlayingCards.Utilities
 {
     /// <summary>
     /// Extension class for System.Collections.Generic.List
     /// </summary>
-    public static partial class ListExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Retrieves a reversed Enumerator for object implemented IExentedList interface
@@ -34,6 +34,14 @@ namespace PlayingCards.Extensions
 			var a = new List<T>();
 			a.AddRange(list);
 			return a;
+		}
+
+		public static void MergeWith<TKey, TValue>(this SortedDictionary<TKey, TValue> dict, SortedDictionary<TKey, TValue> other)
+		{
+			foreach(var keyValuePair in other)
+			{
+				dict.TryAdd(keyValuePair.Key, keyValuePair.Value);
+			}
 		}
     }
 }

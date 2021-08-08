@@ -10,8 +10,7 @@ namespace PlayingCards.Game.Solitaire
 		{
 			NEW_GAME = 1,
 			SAVE_GAME = 2,
-			LOAD_GAME = 3,
-
+			LOAD_GAME = 3
 		}
 	}
 

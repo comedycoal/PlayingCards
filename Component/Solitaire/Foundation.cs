@@ -30,7 +30,8 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// Constructs a standard <see cref="Foundation"/> with <see cref="Suit.HEARTS"/> suit.
 		/// </summary>
-		public Foundation() : base()
+		/// <param name="context">Game context associated</param>
+		public Foundation(IGameContext context) : base(context)
 		{
 			m_associatedSuit = Suit.HEARTS;
 			SetProperties(new PileProperty
@@ -44,7 +45,8 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a <see cref="Foundation"/>.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		public Foundation(PileProperty properties) : base()
+		/// <param name="context">Game context associated</param>
+		public Foundation(IGameContext context, PileProperty properties) : base(context)
         {
 			SetProperties(properties);
 		}
@@ -60,14 +62,15 @@ namespace PlayingCards.Component.Solitaire
 		/// All foundations are uniform, only differs in suit.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		/// <returns></returns>
-		public static List<Foundation> CreateFoundationSet(PileProperty properties)
+		/// <param name="context">Game context associated.</param>
+		/// <returns>A list of 4 <see cref="Foundation"/> of each <see cref="Suit"/>.</returns>
+		public static List<Foundation> CreateFoundationSet(IGameContext context, PileProperty properties)
         {
 			List<Foundation> temp = new List<Foundation>();
 			foreach (var item in Suit.FULL_SUITS_LIST)
 			{
 				properties.CorrespondentSuit = item;
-				temp.Add(new Foundation(properties));
+				temp.Add(new Foundation(context, properties));
 			}
 			return temp;
         }

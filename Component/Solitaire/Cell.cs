@@ -32,13 +32,15 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// Constructs a <see cref="Cell"/>.
 		/// </summary>
-		public Cell() : base() { }
+		/// <param name="context">Game context associated</param>
+		public Cell(IGameContext context) : base(context) { }
 
 		/// <summary>
 		/// Constructs a <see cref="Cell"/>.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		public Cell(PileProperty properties): base()
+		/// <param name="context">Game context associated</param>
+		public Cell(IGameContext context, PileProperty properties): base(context)
 		{
 			SetProperties(properties);
 		}

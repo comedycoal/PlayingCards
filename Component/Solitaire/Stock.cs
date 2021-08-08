@@ -43,7 +43,7 @@ namespace PlayingCards.Component.Solitaire
         private int m_flipAmount;
         private int m_totalRestock;
 		private int m_restockCount;
-        private SolitairePile m_dealDestination;
+        private IdentifierToken m_associationToken;
 		//======================================================================//
 		#endregion
 
@@ -55,9 +55,10 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a standard <see cref="Stock"/>, dealing 1 card, infinite restocks.
 		/// with a dangerous <see langword="null"/> destination pile.
 		/// </summary>
-		public Stock() : base()
+		/// <param name="context">Game context associated</param>
+		public Stock(IGameContext context) : base(context)
 		{
-            m_dealDestination = null;
+            m_associationToken = IdentifierToken.None;
             m_flipAmount = 1;
             m_totalRestock = INFINITE;
             m_restockCount = 0;
@@ -67,7 +68,8 @@ namespace PlayingCards.Component.Solitaire
 		/// Constructs a <see cref="Stock"/>.
 		/// </summary>
 		/// <param name="properties">Properties to instantiate with.</param>
-		public Stock(PileProperty properties) : base()
+		/// <param name="context">Game context associated</param>
+		public Stock(IGameContext context, PileProperty properties) : base(context)
 		{
 			SetProperties(properties);
             m_restockCount = 0;
@@ -104,9 +106,14 @@ namespace PlayingCards.Component.Solitaire
         //==================//
 
         /// <summary>
-        /// Readonly property. Retrieves reference to the deal destination <see cref="SolitairePile"/>.
+        /// Readonly property. Retrieves association token to the deal destination.
         /// </summary>
-        public virtual SolitairePile DealDestination => m_dealDestination;
+        public virtual IdentifierToken AssociationToken => m_associationToken;
+
+		/// <summary>
+		/// Readonly property. Retrieves reference to the deal destination <see cref="SolitairePile"/>, as resolved by the pile's <see cref="IGameContext"/>.
+		/// </summary>
+		private SolitairePile DealDestination => GameContext.ResolveAssociation(this, AssociationToken);
 
         /// <summary>
         /// Readonly property. Retrieves the number of cards transfered to deal destination at once.
@@ -137,12 +144,12 @@ namespace PlayingCards.Component.Solitaire
         /// <inheritdoc cref="SolitairePile.SetProperties"/>
         protected override void SetProperties(PileProperty properties)
         {
-            if (properties.AssociatedPiles == null || properties.AssociatedPiles.Count > 1)
+            if (properties.AssociationTokens == null || properties.AssociationTokens.Count > 1)
             {
                 // throw something
                 throw new NotImplementedException();
             }
-            m_dealDestination = properties.AssociatedPiles[0];
+            m_associationToken = properties.AssociationTokens[0];
             m_flipAmount = properties.DealAmount ?? (int)PileProperty.GetDefaultNoneNullValue("DealAmount");
             m_totalRestock = properties.RestockAllowance ?? (int)PileProperty.GetDefaultNoneNullValue("RestockAllowance"); ;
 
@@ -192,8 +199,8 @@ namespace PlayingCards.Component.Solitaire
         {
             if (Count == 0 && !OutOfStock)
             {
-                System.Action exe = delegate () { ++m_restockCount; };
-                System.Action und = delegate () { --m_restockCount; };
+                Action exe = delegate () { ++m_restockCount; };
+                Action und = delegate () { --m_restockCount; };
                 var a = new GenericMove(exe, und);
                 var transferData = new TransferData<Card>(DealDestination.Cards, null, DealDestination.Count, a);
                 return new ReversedOrderMove(Cards, transferData);
