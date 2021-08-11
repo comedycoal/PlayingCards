@@ -17,8 +17,8 @@ namespace PlayingCards.Game.Solitaire
 	/// </summary>
 	public partial class SolitaireGame : IGame, IGameContext
 	{
-		public static readonly PrioritizedComparer<string> SenderComparer;
-		public static readonly PrioritizedComparer<string> ReceiverComparer;
+		private static readonly PrioritizedComparer<string> SenderComparer;
+		private static readonly PrioritizedComparer<string> ReceiverComparer;
 
 		static SolitaireGame()
 		{
@@ -52,6 +52,13 @@ namespace PlayingCards.Game.Solitaire
 		#region Constructors
 		//================//
 
+		/// <summary>
+		/// Constructs a <see cref="SolitaireGame"/>
+		/// </summary>
+		/// <param name="data">The metadata description.</param>
+		/// <param name="piles">The layout description.</param>
+		/// <param name="rng">The random engine used. Its <see cref="IRandom.Seed"/> does not need to be set beforehand.</param>
+		/// <param name="timer">The timer used.</param>
 		public SolitaireGame(Metadata data, List<PileInfo> piles, IRandom rng, ITimer timer)
 		{
 			m_metadata = data;
@@ -122,18 +129,37 @@ namespace PlayingCards.Game.Solitaire
 		#region New properties
 		//==================//
 
+		/// <summary>
+		/// Readonly property. The seed being used in the game.
+		/// </summary>
 		public uint Seed => m_rng.Seed;
 
+		/// <summary>
+		/// Readonly property. The descriptiong of the game.
+		/// </summary>
 		public string Description { get; protected set; }
 
+		/// <summary>
+		/// Readonly property. Whether the game is started.
+		/// </summary>
 		public bool Started { get; protected set; }
 
+		/// <summary>
+		/// Readonly property. Whether the game is paused.
+		/// </summary>
 		public bool Paused { get; protected set; }
 
+		/// <summary>
+		/// Readonly property. Whether undoing is still possible.
+		/// </summary>
 		public virtual bool CanUndo => m_history.CanUndo;
 
+		/// <summary>
+		/// Readonly property. Whether redoing is still possible.
+		/// </summary>
 		public virtual bool CanRedo => m_history.CanRedo;
 
+		/// <inheritdoc cref="IGameContext.ResolveAssociation"/>
 		public SolitairePile ResolveAssociation(SolitairePile sender, IdentifierToken token)
 		{
 			SolitairePile destination;

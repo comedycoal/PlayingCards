@@ -4,12 +4,12 @@ using System.Text;
 
 namespace PlayingCards.Game.Solitaire
 {
-	public partial class SolitaireGame
-	{
-		public class Statistics
-		{
+	//public partial class SolitaireGame
+	//{
+	//	public class Statistics
+	//	{
 			
-		}
-	}
+	//	}
+	//}
 
 }

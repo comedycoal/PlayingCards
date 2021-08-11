@@ -4,10 +4,10 @@ using System.Text;
 
 namespace PlayingCards.Game.Solitaire
 {
-	public partial class SolitaireGame
-	{
-		public class SaveObject
-		{
-		}
-	}
+	//public partial class SolitaireGame
+	//{
+	//	public class SaveObject
+	//	{
+	//	}
+	//}
 }

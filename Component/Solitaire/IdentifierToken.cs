@@ -11,6 +11,10 @@ namespace PlayingCards.Component.Solitaire
 	/// <remarks>
 	/// In the same context, two <see cref="IdentifierToken"/> is deemed identifying the same "object" if
 	/// they have the same internal "type" and "id".
+	/// <para>
+	/// <see cref="IdentifierToken"/>'s purpose is to provide a way to keep track of user's entities without a manual counter,
+	/// it does not hold reference to any objects, except its <see cref="IdentifierTokenContext"/>.
+	/// </para>
 	/// </remarks>
 	public struct IdentifierToken
 	{
@@ -56,7 +60,15 @@ namespace PlayingCards.Component.Solitaire
 		}
 
 		private IdentifierTokenContext m_context;
+
+		/// <summary>
+		/// Readonly property. Retrieves the string "type" of the token.
+		/// </summary>
 		public string Type { get; set; }
+
+		/// <summary>
+		/// Readonly property. Retrieves the id of the token.
+		/// </summary>
 		public int Id { get; set; }
 
 		/// <summary>

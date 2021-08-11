@@ -263,7 +263,7 @@ namespace PlayingCards.Game.Solitaire.XmlSerialization
 
 			var a = new PileInfo
 			{
-				Position = new Position2D((string)pileElement.Attribute("pos") ?? "0,0"),
+				Position = new IntPosition2D((string)pileElement.Attribute("pos") ?? "0,0"),
 				IsInTableau = isInTableau,
 				GamewiseId = gamewiseId,
 				IdToken = token,

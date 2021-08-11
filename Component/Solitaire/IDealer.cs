@@ -7,7 +7,7 @@ using PlayingCards.Game;
 namespace PlayingCards.Component.Solitaire
 {
 	/// <summary>
-	/// Public interface warrants a Stock pile's methods.
+	/// Public interface warranting a Stock pile's methods.
 	/// </summary>
 	/// <remarks>
 	/// The stock usually houses the entire playing deck at the start of the game, though not a <see cref="Deck"/> object itself
