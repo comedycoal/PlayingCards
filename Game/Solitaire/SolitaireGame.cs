@@ -23,8 +23,23 @@ namespace PlayingCards.Game.Solitaire
 		static SolitaireGame()
 		{
 			SenderComparer = new PrioritizedComparer<string>("file", "reserve", "waste", "cell", "stock", "foundation");
-			SenderComparer = new PrioritizedComparer<string>("foundation", "file", "cell", "waste", "reserve", "stock");
+			ReceiverComparer = new PrioritizedComparer<string>("foundation", "file", "cell", "waste", "reserve", "stock");
 		}
+
+		public class HintInstance
+        {
+			public IdentifierToken Source { get; protected set; }
+			public IdentifierToken Destination { get; protected set; }
+			public int Count { get; protected set; }
+
+			public HintInstance(IdentifierToken src, IdentifierToken dest, int count)
+            {
+				Source = src;
+				Destination = dest;
+				Count = count;
+            }
+        }
+
 
 		#region Fields
 		//==========//
@@ -34,8 +49,8 @@ namespace PlayingCards.Game.Solitaire
 
 		private IdentifierTokenContext m_context;
 		private Dictionary<IdentifierToken, SolitairePile> m_playingPiles;
-		private readonly SolitairePile[] m_prioritySortedReceivers;
-		private readonly SolitairePile[] m_prioritySortedSenders;
+		private readonly IdentifierToken[] m_prioritySortedReceivers;
+		private readonly IdentifierToken[] m_prioritySortedSenders;
 
 		private SolitairePile[] m_tableau;
 		private IFoundation[] m_foundations;
@@ -59,7 +74,8 @@ namespace PlayingCards.Game.Solitaire
 		/// <param name="piles">The layout description.</param>
 		/// <param name="rng">The random engine used. Its <see cref="IRandom.Seed"/> does not need to be set beforehand.</param>
 		/// <param name="timer">The timer used.</param>
-		public SolitaireGame(Metadata data, List<PileInfo> piles, IRandom rng, ITimer timer)
+		/// <param name="customSeed"></param>
+		public SolitaireGame(Metadata data, List<PileInfo> piles, IRandom rng, ITimer timer, uint? customSeed = null)
 		{
 			m_metadata = data;
 			m_deck = data.GameDeck.CreateDeck();
@@ -67,7 +83,6 @@ namespace PlayingCards.Game.Solitaire
 			m_playingPiles = new Dictionary<IdentifierToken, SolitairePile>();
 			m_context = piles[0].IdToken.Context;
 
-			m_playingPiles = new Dictionary<IdentifierToken, SolitairePile>();
 			var allPileList = new List<SolitairePile>();
 			var tempTableau = new List<SolitairePile>();
 			var tempFoundations = new List<IFoundation>();
@@ -100,21 +115,26 @@ namespace PlayingCards.Game.Solitaire
 			var tempReceivers = new List<KeyValuePair<IdentifierToken, SolitairePile>>(m_playingPiles);
 			var tempSenders = new List<KeyValuePair<IdentifierToken, SolitairePile>>(m_playingPiles);
 
-			tempSenders.Sort( (x, y) =>
+			tempSenders.Sort((x, y) =>
 				{
 					return SenderComparer.Compare(x.Key.Type, y.Key.Type);
 				});
-			m_prioritySortedSenders = tempSenders.ConvertAll(x => x.Value).ToArray();
+			m_prioritySortedSenders = tempSenders.ConvertAll(x => x.Key).ToArray();
 			
 			tempReceivers.Sort((x, y) =>
 			{
 				return ReceiverComparer.Compare(x.Key.Type, y.Key.Type);
 			});
-			m_prioritySortedReceivers = tempReceivers.ConvertAll(x => x.Value).ToArray();
+			m_prioritySortedReceivers = tempReceivers.ConvertAll(x => x.Key).ToArray();
 
+			var seed = customSeed ?? (uint)Environment.TickCount;
 			m_rng = rng;
+			m_rng.Seed = seed;
 			m_timer = timer;
 			m_history = new ScoredHistory();
+
+			Started = false;
+			Paused = Ended = null;
 		}
 		//======================================================================//
 		#endregion
@@ -147,7 +167,12 @@ namespace PlayingCards.Game.Solitaire
 		/// <summary>
 		/// Readonly property. Whether the game is paused.
 		/// </summary>
-		public bool Paused { get; protected set; }
+		public bool? Paused { get; protected set; }
+
+		
+		public bool? Ended { get; protected set; }
+
+		public bool AllowInteractions => !(!Started || (bool)Paused || (bool)Ended);
 
 		/// <summary>
 		/// Readonly property. Whether undoing is still possible.
@@ -158,6 +183,118 @@ namespace PlayingCards.Game.Solitaire
 		/// Readonly property. Whether redoing is still possible.
 		/// </summary>
 		public virtual bool CanRedo => m_history.CanRedo;
+		
+		
+		public int TableauCardCount
+		{
+			get
+			{
+				int count = 0;
+				foreach (var pile in m_tableau)
+				{
+					count += pile.Count;
+				}
+				return count;
+			}
+		}
+
+
+		public int FoundationFilledCount
+        {
+			get
+            {
+				int count = 0;
+				foreach(var f in m_foundations)
+                {
+					count += f.Filled ? 1 : 0;
+                }
+				return count;
+            }
+        }
+		//======================================================================//
+		#endregion
+
+
+		#region New methods
+		//===============//
+
+		// Utilities
+		protected ScoredMove CreateMeaningfulMove(IMove move)
+		{
+			return new ScoredMove(move, 1);
+		}
+
+		protected ScoredMove CreateAuxiliaryMove(IMove move)
+		{
+			return new ScoredMove(move, 0);
+		}
+
+		protected bool CheckWin()
+		{
+			if (!Started) return false;
+			if (m_metadata.GameWinCondition == WinCondition.CLEAR_TABLEAU)
+			{
+				return TableauCardCount == 0;
+			}
+			else if (m_metadata.GameWinCondition == WinCondition.FILL_FOUNDATION)
+			{
+				return FoundationFilledCount == m_foundations.Length;
+			}
+			else if (m_metadata.GameWinCondition == WinCondition.CUSTOM)
+			{
+				throw new NotImplementedException();
+			}
+
+			throw new NotImplementedException();
+		}
+
+		protected virtual void MakeStatistics()
+        {
+
+        }
+
+		protected virtual void ClearStatistics()
+        {
+
+        }
+
+		protected virtual void LayoutCleanup()
+        {
+			var tempTableau = new List<SolitairePile>();
+			var tempFoundations = new List<IFoundation>();
+			m_dealer = null;
+
+			foreach(var pair in m_playingPiles)
+            {
+				InterfaceReturn ire;
+				var newPile = SolitairePile.CreateCopyOf(pair.Value, out ire);
+				m_playingPiles[pair.Key] = newPile;
+				tempTableau.Add(newPile);
+				if (ire.FoundationReference != null) tempFoundations.Add(ire.FoundationReference);
+				if (m_dealer != null && ire.DealerReference != null)
+                {
+					throw new NotImplementedException();
+                }
+				else if (ire.DealerReference != null)
+                {
+					m_dealer = ire.DealerReference;
+				}
+            }
+
+			m_foundations = tempFoundations.ToArray();
+			m_tableau = tempTableau.ToArray();
+        }
+
+		protected virtual void Cleanup()
+        {
+			LayoutCleanup();
+			m_rng.Reset();
+			m_history.FullClear();
+			m_timer.Reset();
+        }
+
+
+		// Game context methods
 
 		/// <inheritdoc cref="IGameContext.ResolveAssociation"/>
 		public SolitairePile ResolveAssociation(SolitairePile sender, IdentifierToken token)
@@ -167,12 +304,163 @@ namespace PlayingCards.Game.Solitaire
 			if (!res) return null;
 			return destination;
 		}
-		//======================================================================//
-		#endregion
+
+		protected SolitairePile Get(IdentifierToken token)
+		{
+			return m_playingPiles[token];
+		}
 
 
-		#region New methods
-		//===============//
+		// General "game" methods
+
+		public ISaveObject Save()
+        {
+			throw new NotImplementedException();
+        }
+
+		public void Load(ISaveObject saveObject)
+        {
+			throw new NotImplementedException();
+        }
+
+		public void Start()
+		{
+            if (!Started)
+            {
+				if (!(Ended is null)) Cleanup();
+				else if (Ended ?? false) ClearStatistics();
+
+				Started = true;
+				Paused = false;
+				Ended = false;
+
+				// First-time card deal
+				m_dealer.ReceiveDeck(m_deck.Shuffle(m_rng));
+				m_history.Execute(
+					CreateAuxiliaryMove(
+						m_dealer.CreateInitialDeal(m_playingPiles.Values)
+					)
+				);
+
+				m_timer.Start();
+			}
+        }
+
+		public void Pause()
+        {
+			if (Started && !(Ended ?? false))
+            {
+				Paused = true;
+
+				m_timer.Stop();
+			}
+        }
+
+		public void Resume()
+        {
+			if (Paused ?? false)
+            {
+				Paused = false;
+
+				m_timer.Start();
+			}
+		}
+
+		public void Reset()
+        {
+			End();
+			ClearStatistics();
+			Start();
+        }
+
+		public void End()
+        {
+			if (Started)
+            {
+				Ended = true;
+				Paused = null;
+
+				m_timer.Stop();
+
+				MakeStatistics();
+			}
+        }
+
+
+		// Game object interaction methods
+
+		protected IMove GetTransfer(IdentifierToken from, IdentifierToken to, int count)
+        {
+			if (!AllowInteractions) return null;
+			try
+            {
+				var transfer = m_playingPiles[from].CreateTransfer(m_playingPiles[to], count);
+				return transfer;
+			}
+			catch(KeyNotFoundException e)
+            {
+				throw new NotImplementedException();
+				return null;
+            }
+
+        }
+		public bool TestTransfer(IdentifierToken from, IdentifierToken to, int count)
+		{
+			return GetTransfer(from, to, count) != null;
+		}
+
+		public bool Transfer(IdentifierToken from, IdentifierToken to, int count)
+        {
+			try
+			{
+				m_history.Execute(new ScoredMove(GetTransfer(from, to, count), 1));
+				return true;
+			}
+			catch
+            {
+				return false;
+            }
+        }
+
+		public HintInstance Hint()
+        {
+			if (!AllowInteractions) return null;
+			foreach(var srcTok in m_prioritySortedSenders)
+            {
+				var candidatePile = Get(srcTok);
+				foreach (var destTok in m_prioritySortedReceivers)
+                {
+					for(int i = candidatePile.Count - candidatePile.AvailableIndex; i > 0; --i)
+                    {
+						if (TestTransfer(srcTok, destTok, i))
+							return new HintInstance(srcTok, destTok, i);
+                    }
+                }
+            }
+
+			return null;
+        }
+
+		public bool InferMove(IdentifierToken sourceToken, int count)
+        {
+			if (!AllowInteractions) return false;
+			foreach(var destTok in m_prioritySortedReceivers)
+            {
+				var move = GetTransfer(sourceToken, destTok, count);
+				if (move != null)
+                {
+					m_history.Execute(CreateMeaningfulMove(move));
+					return true;
+                }
+			}
+
+			return false;
+        }
+
+		public void Deal()
+        {
+			m_history.Execute(CreateMeaningfulMove(m_dealer.CreateDealMove()));
+        }
 
 		//======================================================================//
 		#endregion

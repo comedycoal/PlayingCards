@@ -42,13 +42,13 @@ namespace PlayingCards.Component.Solitaire
 			return value + 1;
 		}
 
-		/// <summary>
-		/// Returns a suggested name for a pile identifying as <paramref name="name"/> with id <paramref name="id"/>
-		/// </summary>
-		/// <param name="name">Identifying string.</param>
-		/// <param name="id">Id.</param>
-		/// <returns><see langword="null"/> if no records are found, otherwise a <see cref="string"/> instance.</returns>
-		public string GetSuggestedName(string name, int id)
+        /// <summary>
+        /// Returns a suggested name for a pile identifying as <paramref name="name"/> with id <paramref name="id"/>
+        /// </summary>
+        /// <param name="name">Identifying string.</param>
+        /// <param name="id">Id.</param>
+        /// <returns><see langword="null"/> if no records are found, otherwise a <see cref="string"/> instance.</returns>
+        public string GetSuggestedName(string name, int id)
 		{
 			int value;
 			if (!m_counter.TryGetValue(name, out value) || m_counter[name] < id)

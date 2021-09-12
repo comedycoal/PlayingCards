@@ -17,7 +17,7 @@
         public bool CanRedo { get; }
 
 		/// <summary>
-		/// Execute and add <paramref name="move"/> to the stack. Override all actions that have been undid.
+		/// Execute and add <paramref name="move"/> to the stack. Override all actions that had been undid.
 		/// </summary>
 		/// <param name="move">A <see cref="IMove"/> implemented object.</param>
 		public void Execute(T move);
@@ -31,6 +31,8 @@
         /// Execute the oldest undid action/move.
         /// </summary>
         public void Redo();
+
+        public void FullClear();
         
 	}
 }

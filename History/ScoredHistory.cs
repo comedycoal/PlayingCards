@@ -56,5 +56,13 @@ namespace PlayingCards.History
             m_historyQueue[m_historyPointerIndex].Execute();
             ++m_historyPointerIndex;
         }
+
+        /// <inheritdoc cref="IHistory{T}.FullClear"/>
+        public void FullClear()
+        {
+            m_historyQueue.Clear();
+            m_historyQueue = new List<ScoredMove>();
+            m_historyPointerIndex = -1;
+        }
     }
 }

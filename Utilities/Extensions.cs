@@ -36,6 +36,17 @@ namespace PlayingCards.Utilities
 			return a;
 		}
 
+		/// <summary>
+		/// Add dictionary entries from <paramref name="other"/> into <paramref name="dict"/>.
+		/// </summary>
+		/// <remarks>
+		/// Entries are added sequentially and duplicated entries are skipped entirely.
+		/// <paramref name="other"/> is unchanged after merging.
+		/// </remarks>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="dict">The <see cref="SortedDictionary{TKey, TValue}"/> receiving the records.</param>
+		/// <param name="other">The <see cref="SortedDictionary{TKey, TValue}"/> being merged.</param>
 		public static void MergeWith<TKey, TValue>(this SortedDictionary<TKey, TValue> dict, SortedDictionary<TKey, TValue> other)
 		{
 			foreach(var keyValuePair in other)

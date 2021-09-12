@@ -94,7 +94,8 @@ namespace PlayingCards.Component.Solitaire
 		/// <param name="property">The properties of the pile.</param>
 		/// <param name="mode">The <see cref="PileProperty.TransferMode"/> used.</param>
 		/// <returns>A <see cref="SolitairePile"/> instance.</returns>
-		public static SolitairePile CreatePile(IGameContext context,
+		public static SolitairePile CreatePile(
+										IGameContext context,
 										Type type,
 										out InterfaceReturn interfaceReturn,
 										PileProperty property,
@@ -141,6 +142,15 @@ namespace PlayingCards.Component.Solitaire
 				throw new NotImplementedException();
 			}
 		}
+
+		public static SolitairePile CreateCopyOf(SolitairePile other, out InterfaceReturn interfaceReturn)
+        {
+			var type = other.GetType();
+			var prop = other.GetProperties();
+			var res = CreatePile(other.GameContext, type, out interfaceReturn, prop, PileProperty.TransferMode.STRICT);
+			return res;
+        }
+
 		//======================================================================//
 		#endregion
 
@@ -227,7 +237,7 @@ namespace PlayingCards.Component.Solitaire
         //===============//
 
         /// <summary>
-        /// Force retrieval of a <see cref="Card"/> instance with actual data, regardless of its faced-down status.
+        /// Force retrieval of a <see cref="Card"/> instance with its actual data, regardless of its faced-down status.
         /// </summary>
         /// <param name="index">index to retrieve</param>
         /// <returns>A <see cref="Card"/> instance.
@@ -247,7 +257,7 @@ namespace PlayingCards.Component.Solitaire
         /// </summary>
         /// <param name="index">Index to retrieve.</param>
         /// <returns>A <see cref="Card"/> instance.
-		/// <list>May return <see cref="Card.FACED_DOWN"/> if the card at <paramref name="index"/> is not visible.</list>
+		/// <list>May return <see cref="Card.FACED_DOWN"/> if the card at <paramref name="index"/> is faced down.</list>
 		/// <list>May return <see cref="Card.EMPTY"/> if <paramref name="index"/> is <see langword="0"/> and the pile is empty.</list>
 		/// <list>May return <see cref="Card.NONE"/> if <paramref name="index"/> is out of range.</list>
 		/// </returns>
@@ -271,6 +281,10 @@ namespace PlayingCards.Component.Solitaire
 		/// <summary>
 		/// Set relevant properties inferred form <paramref name="properties"/>
 		/// </summary>
+		/// <remarks>
+		/// Subclass implementations may replace <see cref="PileProperty.InitialCount"/> and
+		/// <see cref="PileProperty.PileBuildStrategy"/> with their respective default values.
+		/// </remarks>
 		/// <param name="properties"></param>
 		protected virtual void SetProperties(PileProperty properties)
 		{
@@ -310,7 +324,7 @@ namespace PlayingCards.Component.Solitaire
 		/// to be executed after the transfer is performed.
 		/// </summary>
 		/// <remarks>
-		/// Used in conjunction with <see cref="SolitairePile.CreateTransfer"/>, signifies an action made ON the SOURCE pile.
+		/// Used in conjunction with <see cref="SolitairePile.CreateTransfer"/>, specifies a callback invoked ON the SOURCE pile.
 		/// <para>Implementation of this method should only modify <paramref name="transferData"/> via the <see cref="TransferData{T}.AddAction"/> method.</para>
 		/// </remarks>
 		/// <param name="transferData">Reference to a <see cref="TransferData{Card}"/></param>
@@ -321,7 +335,7 @@ namespace PlayingCards.Component.Solitaire
 		/// to be executed after the transfer is performed.
 		/// </summary>
 		/// <remarks>
-		/// Used in conjunction with <see cref="SolitairePile.CreateTransfer"/>, signifies an action made ON the DESTINATION pile.
+		/// Used in conjunction with <see cref="SolitairePile.CreateTransfer"/>,specifies a callback made ON the DESTINATION pile.
 		/// <para>Implementation of this method should only modify <paramref name="transferData"/> via the <see cref="TransferData{T}.AddAction"/> method.</para>
 		/// </remarks>
 		protected abstract void OnExtraction(ref TransferData<Card> transferData);
@@ -362,6 +376,8 @@ namespace PlayingCards.Component.Solitaire
 			}
 			return move;
 		}
+
+		public abstract SolitairePile Duplicate();
 		//======================================================================//
 		#endregion
 	}

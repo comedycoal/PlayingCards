@@ -201,9 +201,17 @@ namespace PlayingCards.Primitives
 			return new Suit(a);
 		}
 
-		public static explicit operator Suit(string a)
+
+		/// <summary>
+		/// Explicit cast of a <see cref="string"/> object to <see cref="Suit"/>.
+		/// </summary>
+		/// <remarks>>
+		/// Subceptible values for <paramref name="value"/> are: "Hearts", "Diamonds", "Clubs", "Spades", "Any", or their lower-case variant.
+		/// </remarks>
+		/// <param name="value"></param>
+		public static explicit operator Suit(string value)
 		{
-			switch (a)
+			switch (value)
 			{
 				case "hearts":
 				case "Hearts":

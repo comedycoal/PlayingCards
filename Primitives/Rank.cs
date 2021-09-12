@@ -251,9 +251,16 @@ namespace PlayingCards.Primitives
 			return new Rank(a);
 		}
 
-		public static explicit operator Rank(string a)
+		/// <summary>
+		/// Explicit cast of a <see cref="string"/> object to <see cref="Rank"/>.
+		/// </summary>
+		/// <remarks>>
+		/// Subceptible values for <paramref name="value"/> are: "1" to "10", "A", "J", "Q", "K", "Any", "any".
+		/// </remarks>
+		/// <param name="value"></param>
+		public static explicit operator Rank(string value)
 		{
-			switch(a)
+			switch(value)
 			{
 				case "A":
 					return Rank.A_RANK;
@@ -269,13 +276,15 @@ namespace PlayingCards.Primitives
 				default:
 					try
 					{
-						return (Rank)(int.Parse(a));
+						var res = int.Parse(value);
+						if (!(0 < res && res <= 10))
+							throw new System.Exception();
+						return (Rank)res;
 					}
 					catch
 					{
 						throw new System.NotImplementedException();
 					}
-
 			}
 		}
         //======================================================================//

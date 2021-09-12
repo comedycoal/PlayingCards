@@ -7,7 +7,7 @@ using PlayingCards.Game;
 namespace PlayingCards.Component.Solitaire
 {
 	/// <summary>
-	/// Public interface warranting a Stock pile's methods.
+	/// Defines methods for cards dealing at game start and throughout gameplay.
 	/// </summary>
 	/// <remarks>
 	/// The stock usually houses the entire playing deck at the start of the game, though not a <see cref="Deck"/> object itself
@@ -26,6 +26,8 @@ namespace PlayingCards.Component.Solitaire
 		/// </summary>
 		/// <param name="destinations">Destination piles.</param>
 		/// <returns>An <see cref="IMove"/> implementation.</returns>
-		public IMove CreateInitialDeal(List<SolitairePile> destinations);
+		public IMove CreateInitialDeal(IEnumerable<SolitairePile> destinations);
+
+		public IMove CreateDealMove();
 	}
 }
